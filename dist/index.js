@@ -4597,33 +4597,53 @@ async function run() {
 
     // Get the inputs from the workflow file: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
     const uploadUrl = core.getInput('upload_url', { required: true });
-    const assetPath = core.getInput('asset_path', { required: true });
-    const assetName = core.getInput('asset_name', { required: true });
-    const assetContentType = core.getInput('asset_content_type', { required: true });
+    const assetsFromFile = core.getInput('assets_from_file', { required: false });
+
+    const assets = [];
+
+    if (assetsFromFile.length > 0) {
+      const assetsTsv = fs.readFileSync(assetsFromFile, { encoding: 'utf8', flag: 'r' });
+      const assetsRaw = assetsTsv
+        .trim()
+        .split(/\n/)
+        .map(line => line.split(/\t/));
+
+      if (!assetsRaw.every(asset => asset.length === 3)) {
+        throw new Error(`Assets from file seem broken, it must contain 3 colums for every line`);
+      }
+
+      assetsRaw.forEach(asset => {
+        assets.push({ path: asset[0], name: asset[1], 'content-type': asset[2] });
+      });
+    }
+    // No `assets_from_file` input.
+    else {
+      const assetPath = core.getInput('asset_path', { required: true });
+      const assetName = core.getInput('asset_name', { required: true });
+      const assetContentType = core.getInput('asset_content_type', { required: true });
+
+      assets.push({ path: assetPath, name: assetName, 'content-type': assetContentType });
+    }
 
     // Determine content-length for header to upload asset
-    const contentLength = filePath => fs.statSync(filePath).size;
+    const contentLengthOf = filePath => fs.statSync(filePath).size;
 
-    // Setup headers for API call, see Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
-    const headers = { 'content-type': assetContentType, 'content-length': contentLength(assetPath) };
+    await Promise.all(
+      assets.map(async ({ path: assetPath, name: assetName, 'content-type': assetContentType }) => {
+        // Setup headers for API call, see Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
+        const headers = { 'content-type': assetContentType, 'content-length': contentLengthOf(assetPath) };
 
-    // Upload a release asset
-    // API Documentation: https://developer.github.com/v3/repos/releases/#upload-a-release-asset
-    // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset
-    const uploadAssetResponse = await github.repos.uploadReleaseAsset({
-      url: uploadUrl,
-      headers,
-      name: assetName,
-      file: fs.readFileSync(assetPath)
-    });
-
-    // Get the browser_download_url for the uploaded release asset from the response
-    const {
-      data: { browser_download_url: browserDownloadUrl }
-    } = uploadAssetResponse;
-
-    // Set the output variable for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
-    core.setOutput('browser_download_url', browserDownloadUrl);
+        // Upload a release asset
+        // API Documentation: https://developer.github.com/v3/repos/releases/#upload-a-release-asset
+        // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset
+        await github.repos.uploadReleaseAsset({
+          url: uploadUrl,
+          headers,
+          name: assetName,
+          file: fs.readFileSync(assetPath)
+        });
+      })
+    );
   } catch (error) {
     core.setFailed(error.message);
   }
