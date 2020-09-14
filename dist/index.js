@@ -4609,7 +4609,7 @@ async function run() {
         .map(line => line.split(/\t/));
 
       if (!assetsRaw.every(asset => asset.length === 3)) {
-        throw new Error(`Assets from file seem broken, it must contain 3 colums for every line`);
+        throw new Error(`Assets from file seem broken, it must contain 3 columns for every line`);
       }
 
       assetsRaw.forEach(asset => {
