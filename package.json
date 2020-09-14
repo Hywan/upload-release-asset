@@ -1,6 +1,6 @@
 {
   "name": "upload-release-asset",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "description": "Upload a release asset to an existing GitHub Release",
   "main": "dist/index.js",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wasmerio/upload-release-asset"
+    "url": "git+https://github.com/Hywan/upload-release-asset"
   },
   "keywords": [
     "actions",
@@ -21,22 +21,22 @@
   "author": "GitHub",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.0.0",
-    "@actions/exec": "^1.0.0",
-    "@actions/github": "^1.0.0"
+    "@actions/core": "^1.2.5",
+    "@actions/exec": "^1.0.4",
+    "@actions/github": "^1.1.0"
   },
   "devDependencies": {
-    "@zeit/ncc": "^0.20.4",
+    "@zeit/ncc": "^0.20.5",
     "eslint": "^5.13.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-prettier": "^3.6.0",
-    "eslint-plugin-import": "^2.16.0",
-    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
     "eslint-plugin-prettier": "^2.7.0",
-    "eslint-plugin-react": "^7.12.4",
+    "eslint-plugin-react": "^7.20.6",
+    "husky": "^3.1.0",
     "jest": "^24.8.0",
-    "prettier": "^1.16.4",
-    "husky": "^3.0.5"
+    "prettier": "^1.19.1"
   },
   "jest": {
     "testEnvironment": "node",
